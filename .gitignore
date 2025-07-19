@@ -1,0 +1,25 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.log
+.env
+.env.*
+.vscode/
+.idea/
+.DS_Store
+*.egg-info/
+.mypy_cache/
+# MacOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
