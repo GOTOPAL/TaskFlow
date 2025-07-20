@@ -11,6 +11,11 @@ class UserOut(BaseModel):
     surname:str
     email:EmailStr
 
+
 class UserLogin(BaseModel):
     email:EmailStr
     password:str
+
+class UserInfo(UserOut):
+    email_verified:bool
+    is_active:bool

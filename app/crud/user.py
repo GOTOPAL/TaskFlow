@@ -25,4 +25,7 @@ async def create_user(db:AsyncSession,user_data:UserCreate):
     await db.refresh(user)
     return user
 
-
+# #existing_user() da kullanılabilirdi ama öğrenmek için yaptım
+async def get_me(db:AsyncSession,user_id:int):
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()

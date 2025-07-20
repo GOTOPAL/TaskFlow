@@ -6,7 +6,7 @@ from app.auth.jwt import decode_access_token
 from app.crud.user import get_user_by_user_id
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 async def get_current_user(token:str=Depends(oauth2_scheme),db:AsyncSession=Depends(get_db)):
     id = decode_access_token(token)
