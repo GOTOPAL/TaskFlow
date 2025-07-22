@@ -17,5 +17,6 @@ class UserLogin(BaseModel):
     password:str
 
 class UserInfo(UserOut):
+    id:int
     email_verified:bool
     is_active:bool

@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from sqlalchemy import select
@@ -5,7 +6,7 @@ from app.models.user import User
 from app.schemas.user import UserCreate,UserLogin
 from app.auth.security import get_password_hash
 
-async def get_user_by_user_id(db:AsyncSession ,  user_id:str)->User:
+async def get_user_by_user_id(db:AsyncSession ,  user_id:int)->User:
     stmt = select(User).where(User.id == user_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
@@ -29,3 +30,9 @@ async def create_user(db:AsyncSession,user_data:UserCreate):
 async def get_me(db:AsyncSession,user_id:int):
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()
+
+async def delete_user(db:AsyncSession,user_id:int):
+    user =await get_user_by_user_id(db,user_id)
+    await db.delete(user)
+    await db.commit()
+    return {"success": True, "message": "İşlem başarılı"}
