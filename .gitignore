@@ -23,3 +23,51 @@ __pycache__/
 
 # PyCharm
 .idea/
+
+
+# macOS genel
+.DS_Store
+
+# Xcode proje dosyaları
+*.xcuserdata
+*.xcuserstate
+*.xcscmblueprint
+*.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# DerivedData
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# SwiftPM
+.build/
+.swiftpm/xcode/package.xcworkspace/
+
+# Playground dosyaları
+timeline.xctimeline
+playground.xcworkspace
+
+# CocoaPods (eğer varsa)
+Pods/
+
+# Carthage (eğer varsa)
+Carthage/Build/
+
+# SPM cache
+Package.resolved
+
+# Fastlane (eğer kullanıyorsan)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Firebase/GoogleService-Info (kullanılıyorsa, gizli tut)
+GoogleService-Info.plist
+
+# Kişisel ayarlar
+*.env
+.env.*
