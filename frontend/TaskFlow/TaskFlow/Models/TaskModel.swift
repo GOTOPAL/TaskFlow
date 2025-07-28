@@ -9,3 +9,18 @@ struct TaskItem: Identifiable, Codable {
     let category_id: Int
 
 }
+
+
+
+struct NewTaskRequest: Codable {
+    let context: String
+    let description: String
+    let status: String
+    let priority: Int
+    let category_id: Int
+}
+
+struct CategoryItem: Identifiable, Codable {
+    let id: Int
+    let name: String
+}

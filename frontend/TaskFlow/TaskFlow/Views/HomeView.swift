@@ -5,6 +5,7 @@ struct HomeView: View {
     @State private var tasks: [TaskItem] = []
     @State private var isLoading = true
     @State private var errorMessage = ""
+    @State private var isPresentingAddTask = false
 
     var body: some View {
         NavigationView {
@@ -18,19 +19,25 @@ struct HomeView: View {
                     Text("Görev bulunamadı")
                         .foregroundColor(.gray)
                 } else {
-                    List(tasks) { task in
-                        TaskCardView(task: task)
-                            .listRowSeparator(.hidden)
+                    List {
+                        ForEach(tasks) { task in
+                            TaskCardView(task: task)
+                                .listRowSeparator(.hidden)
+                        }
+                        .onDelete(perform: deleteTaskAt) // ✅ Silme özelliği
                     }
                     .listStyle(.plain)
                 }
             }
             .navigationTitle("Görevlerim")
+
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if let user = session.currentUser {
                         HStack(spacing: 6) {
                             Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .frame(width: 20, height: 20)
                                 .foregroundColor(.blue)
 
                             Text(user.name)
@@ -41,11 +48,26 @@ struct HomeView: View {
                     }
                 }
 
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Çıkış") {
-                        session.logout()
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        isPresentingAddTask = true
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
                     }
+
+                    Button(action: {
+                        session.logout()
+                    }) {
+                        Text("Çıkış")
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+
+            .sheet(isPresented: $isPresentingAddTask) {
+                AddTaskView {
+                    loadTasks() // ✅ Görev eklenince liste yenilenir
                 }
             }
 
@@ -84,6 +106,29 @@ struct HomeView: View {
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
                     self.isLoading = false
+                }
+            }
+        }
+    }
+
+    func deleteTaskAt(offsets: IndexSet) {
+        guard let index = offsets.first else { return }
+
+        let task = tasks[index]
+
+        Task {
+            do {
+                guard let token = session.token else { return }
+
+                try await TaskService.shared.deleteTask(token: token, taskId: task.id)
+
+                await MainActor.run {
+                    tasks.remove(atOffsets: offsets)
+                }
+
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Görev silinemedi: \(error.localizedDescription)"
                 }
             }
         }

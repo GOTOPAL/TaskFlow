@@ -61,7 +61,6 @@ class AuthService {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        print("📦 CurrentUser JSON: \(String(data: data, encoding: .utf8) ?? "empty")")
 
         let decoded = try JSONDecoder().decode(User.self, from: data)
         return decoded
