@@ -7,6 +7,8 @@ struct HomeView: View {
     @State private var errorMessage = ""
     @State private var isPresentingAddTask = false
 
+    @State private var categoryDict: [Int: String] = [:] // ✅ Kategori adları için
+
     var body: some View {
         NavigationView {
             Group {
@@ -21,10 +23,19 @@ struct HomeView: View {
                 } else {
                     List {
                         ForEach(tasks) { task in
-                            TaskCardView(task: task)
-                                .listRowSeparator(.hidden)
+                            NavigationLink {
+                                TaskDetailView(
+                                    task: task,
+                                    categoryName: categoryDict[task.category_id] ?? "Bilinmiyor"
+                                ) {
+                                    loadTasks() // Güncelleme sonrası liste yenilensin
+                                }
+                            } label: {
+                                TaskCardView(task: task, categoryName: categoryDict[task.category_id])
+                            }
+                            .listRowSeparator(.hidden)
                         }
-                        .onDelete(perform: deleteTaskAt) // ✅ Silme özelliği
+                        .onDelete(perform: deleteTaskAt)
                     }
                     .listStyle(.plain)
                 }
@@ -49,30 +60,29 @@ struct HomeView: View {
                 }
 
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button(action: {
+                    Button {
                         isPresentingAddTask = true
-                    }) {
+                    } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
                     }
 
-                    Button(action: {
+                    Button("Çıkış") {
                         session.logout()
-                    }) {
-                        Text("Çıkış")
-                            .foregroundColor(.red)
                     }
+                    .foregroundColor(.red)
                 }
             }
 
             .sheet(isPresented: $isPresentingAddTask) {
                 AddTaskView {
-                    loadTasks() // ✅ Görev eklenince liste yenilenir
+                    loadTasks()
                 }
             }
 
             .onAppear {
                 loadTasks()
+                loadCategories()
             }
         }
     }
@@ -111,9 +121,22 @@ struct HomeView: View {
         }
     }
 
+    func loadCategories() {
+        Task {
+            do {
+                guard let token = session.token else { return }
+                let categories = try await TaskService.shared.fetchCategories(token: token)
+                await MainActor.run {
+                    self.categoryDict = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
+                }
+            } catch {
+                print("Kategori yüklenemedi: \(error.localizedDescription)")
+            }
+        }
+    }
+
     func deleteTaskAt(offsets: IndexSet) {
         guard let index = offsets.first else { return }
-
         let task = tasks[index]
 
         Task {

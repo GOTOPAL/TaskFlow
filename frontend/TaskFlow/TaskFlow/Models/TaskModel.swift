@@ -9,7 +9,19 @@ struct TaskItem: Identifiable, Codable {
     let category_id: Int
 
 }
-
+extension TaskItem {
+    var categoryName: String {
+        switch category_id {
+        case 1: return "Kişisel ve Gelişim"
+        case 2: return "İş ve Proje Yönetimi"
+        case 3: return "Eğitim ve Öğrenme"
+        case 4: return "Ev ve Günlük Hayat"
+        case 5: return "Sosyal ve Hobiler"
+        case 6: return "Diğer"
+        default: return "Bilinmeyen"
+        }
+    }
+}
 
 
 struct NewTaskRequest: Codable {

@@ -83,6 +83,25 @@ class TaskService{
             throw URLError(.badServerResponse)
         }
     }
+    
+    
+    func updateTask(token: String, taskId: Int, updatedTask: NewTaskRequest) async throws {
+        guard let url = URL(string: "\(baseURL)/tasks/\(taskId)") else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(updatedTask)
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+    }
 
 
 }
