@@ -1,6 +1,7 @@
 import SwiftUI
 
 class SessionManager: ObservableObject {
+    static let shared = SessionManager() 
     @Published var token: String? {
         didSet {
             if let token = token {

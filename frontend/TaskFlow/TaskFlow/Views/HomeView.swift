@@ -83,6 +83,11 @@ struct HomeView: View {
             .onAppear {
                 loadTasks()
                 loadCategories()
+                
+                let testToken = "test-fcm-token-1234"
+                Task {
+                    try? await NotificationService.sendFCMToken(testToken)
+                }
             }
         }
     }

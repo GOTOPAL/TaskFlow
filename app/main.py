@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.db.base import Base
 from app.db.session import engine
-from app.routes import category, user,task
+from app.routes import category, user,task,notification
 import app.models
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,3 +29,4 @@ app.add_middleware(
 app.include_router(user.router)
 app.include_router(task.router)
 app.include_router(category.router)
+app.include_router(notification.router)

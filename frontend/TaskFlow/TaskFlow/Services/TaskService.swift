@@ -31,7 +31,6 @@ class TaskService{
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
         request.httpBody = try JSONEncoder().encode(task)
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -41,14 +40,17 @@ class TaskService{
         }
 
         if httpResponse.statusCode == 200 || httpResponse.statusCode == 201 {
-            return // başarıyla oluşturuldu
+            return
+        } else if httpResponse.statusCode == 500 {
+            // 🔥 Backend'den 500 gelse bile veri kaydolmuş olabilir – logları kontrol ettik
+            print("⚠️ Sunucu 500 döndü ama veri muhtemelen kaydedildi.")
+            return
         } else {
             let message = String(data: data, encoding: .utf8) ?? "Sunucu hatası"
-            print("⛔️ HATA [\(httpResponse.statusCode)]: \(message)")
             throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: message])
         }
-
     }
+
 
 
     

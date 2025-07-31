@@ -71,3 +71,6 @@ GoogleService-Info.plist
 # Kişisel ayarlar
 *.env
 .env.*
+
+
+app/firebase/service_account_key.json

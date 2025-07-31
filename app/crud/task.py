@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.task import Task
 from sqlalchemy import select
 from app.schemas.task import AddTask
+from app.services.notification import send_notification_to_user
 
 
 async def get_tasks(db:AsyncSession,user_id:int):
@@ -19,6 +20,15 @@ async def add_task(db: AsyncSession, task_data: AddTask, user_id: int):
     db.add(task)
     await db.commit()
     await db.refresh(task)
+
+
+     # 2️⃣ Oluşturan kullanıcıya bildirim gönder
+    await send_notification_to_user(
+        user_id=user_id,
+        db=db,
+        title="✅ Görev Oluşturuldu",
+        body=f"'{task.title}' adlı görev başarıyla oluşturuldu."
+    )
     return task
 
 # Görev bul (id ve user_id ile)
