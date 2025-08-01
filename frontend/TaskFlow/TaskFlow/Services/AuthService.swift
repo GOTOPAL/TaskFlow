@@ -60,10 +60,69 @@ class AuthService {
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        let (data, _) = try await URLSession.shared.data(for: request)
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
 
-        let decoded = try JSONDecoder().decode(User.self, from: data)
-        return decoded
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw AuthError.unknown
+            }
+
+            switch httpResponse.statusCode {
+            case 200:
+                return try JSONDecoder().decode(User.self, from: data)
+
+            case 401:
+                // Token expired ya da geçersiz
+                throw AuthError.custom("Oturum süresi doldu. Lütfen tekrar giriş yap.")
+
+            default:
+                let serverError = try? JSONDecoder().decode(ServerError.self, from: data)
+                throw AuthError.custom(serverError?.detail ?? "Bilinmeyen bir hata oluştu.")
+            }
+
+        } catch let decodingError as DecodingError {
+            print("❌ Decoding error: \(decodingError)")
+            throw AuthError.custom("Kullanıcı bilgisi okunamadı.")
+        } catch {
+            print("❌ Unknown error: \(error)")
+            throw AuthError.custom("Bir hata oluştu: \(error.localizedDescription)")
+        }
     }
+
+
+    
+    
+    
+    
+    func registerUser(name: String, surname: String, email: String, password: String) async throws {
+           guard let url = URL(string: "\(baseURL)/auth/register") else {
+               throw AuthError.custom("Geçersiz URL")
+           }
+
+           var request = URLRequest(url: url)
+           request.httpMethod = "POST"
+           request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+           let payload = RegisterPayload(
+               name: name,
+               surname: surname,
+               email: email,
+               password: password
+           )
+
+           let encoded = try JSONEncoder().encode(payload)
+           request.httpBody = encoded
+
+           let (data, response) = try await URLSession.shared.data(for: request)
+
+           guard let httpRes = response as? HTTPURLResponse else {
+               throw AuthError.unknown
+           }
+
+           if httpRes.statusCode != 200 {
+               let serverError = try? JSONDecoder().decode(ServerError.self, from: data)
+               throw AuthError.custom(serverError?.detail ?? "Kayıt başarısız oldu.")
+           }
+       }
 
 }   
